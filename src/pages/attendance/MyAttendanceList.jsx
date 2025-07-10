@@ -45,7 +45,6 @@ const initialData = [
 ];
 
 export default function AttendancePage() {
-  const [pendingData, setPendingData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [notif, setNotif] = useState({
     open: false,
@@ -53,13 +52,11 @@ export default function AttendancePage() {
     message: "",
   });
   const [loading, setLoading] = useState(false);
-  const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const fetchDataByFilter = async (name, startDate, endDate) => {   
+  const fetchDataByFilter = async (startDate, endDate) => {   
     setLoading(true);
     try {
-      const response = await api.getAttendanceByFilter(name, startDate, endDate); // Adjust API call as necessary
+      const response = await api.getMyAttendanceByFilter(startDate, endDate); // Adjust API call as necessary
       setFilteredData(response || []);
     } catch (error) {
       console.error("Error fetching attendance data:", error);
@@ -88,21 +85,17 @@ export default function AttendancePage() {
       setLoading(false);
     }
   };
-  
-  useEffect(() => {
-    fetchPendingData();
-  }, []);
 
   const handleSearch = (filters) => {
-    const { name, startDate, endDate } = filters;
+    const { startDate, endDate } = filters;
     // Fetch data based on filters
     try {
-      if (!name && !startDate && !endDate) {
+      if (!startDate && !endDate) {
         // If no filters, reset to initial data
         setFilteredData([]); // Reset filtered data
       } else {
         // Fetch data based on provided filters   
-        fetchDataByFilter(name, startDate, endDate);
+        fetchDataByFilter(startDate, endDate);
       }
     } catch (error) {
       console.error("Error applying filters:", error);
@@ -114,40 +107,6 @@ export default function AttendancePage() {
     }   
   };
 
-  const handleAction = async({id, status, reason}) => {
-    try {
-      if (status === "approved") {
-        await api.updateAttendanceStatusApprove(id);
-        setNotif({
-          open: true,
-          severity: "success",
-          message: "Attendance approved successfully",
-        });
-      } else if (status === "rejected") {
-        await api.updateAttendanceStatusReject(id, reason);          
-        setNotif({
-          open: true,
-          severity: "success",
-          message: "Attendance rejected successfully",    
-        });
-      }
-      // Refresh pending data after action
-      fetchPendingData();
-    } catch (error) {       
-      console.error("Error updating attendance status:", error);
-      setNotif({
-        open: true,
-        severity: "error",
-        message: error?.message || "Failed to update attendance status",
-      });
-    }
-  };
-
-  const handleRejectClick = (record) => {
-    setSelectedRecord(record);
-    setRejectModalOpen(true);
-  };
-
   const handleManualAttendance = async (data) => {
     try {
       const res = await api.addManualAttendance(data);
@@ -156,7 +115,6 @@ export default function AttendancePage() {
         severity: "success",
         message: res?.message || "Manual attendance added successfully",
       });
-      fetchPendingData();
     } catch (error) {
       console.error("Error adding manual attendance:", error);
       setNotif({
@@ -174,7 +132,7 @@ export default function AttendancePage() {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h6" gutterBottom>
-        Attendance Management
+        My Attendance
       </Typography>
 
       <Box mb={3} mt={3}>
@@ -182,19 +140,18 @@ export default function AttendancePage() {
           onSubmit={(data) => handleManualAttendance(data)}
         />
       </Box>
-
+      
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 6 }}>
         <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
-          View Employee Attendance
+          View Attendance
         </Typography>
 
-        <AttendanceFilter onSearch={handleSearch} />
+        <AttendanceFilter onSearch={handleSearch} itIsMy={true} />
 
         <TableContainer component={Paper}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Employee</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell>Check In</TableCell>
                 <TableCell>Check Out</TableCell>
@@ -203,9 +160,8 @@ export default function AttendancePage() {
             </TableHead>
 
             <TableBody>
-              {filteredData.map((row) => (
+              {filteredData?.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell>{row.name}</TableCell>
                   <TableCell>{row.date}</TableCell>
                   <TableCell>{row.punch_in}</TableCell>
                   <TableCell>{row.punch_out}</TableCell>
@@ -231,78 +187,6 @@ export default function AttendancePage() {
         </TableContainer>
       </Paper>
 
-      <Paper elevation={3} sx={{ padding: 3, marginBottom: 6 }}>
-        <Typography mb={3} variant="h6" gutterBottom>
-          Pending Attendance
-        </Typography>
-
-        <TableContainer component={Paper}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Employee</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Check In</TableCell>
-                <TableCell>Check Out</TableCell>
-                <TableCell>Submited Date</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {pendingData?.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.employee_id}</TableCell>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell>{row.punch_in}</TableCell>
-                  <TableCell>{row.punch_out}</TableCell>
-                  <TableCell>{row.created_at}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={STATUS_MAP[row?.approval_status?.toLowerCase()].label}
-                      color={STATUS_MAP[row?.approval_status?.toLowerCase()].color}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Approve">
-                      <IconButton
-                        color="success"
-                        onClick={() => handleAction({id:row.id, status: "approved"})}
-                      >
-                        <Done />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Reject">
-                      <IconButton
-                        color="error"
-                        onClick={() => handleRejectClick(row)}
-                      >
-                        <Clear />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
-
-              {pendingData.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No attendance records found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-      <RejectAttendanceModal
-        open={rejectModalOpen}
-        onClose={() => setRejectModalOpen(false)}
-        onSubmit={handleAction}
-        record={selectedRecord}
-      />
       <Notification
         open={notif.open}
         onClose={() => setNotif({ ...notif, open: false })}

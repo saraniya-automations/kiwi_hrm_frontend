@@ -2,10 +2,6 @@ import { create } from "zustand";
 import api from "../services/api";
 import { jwtDecode } from "jwt-decode";
 
-const getStoredUser = () => {
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
-};
 const getStoredToken = () => localStorage.getItem("token") || null;
 
 const useAuthStore = create((set) => ({

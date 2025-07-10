@@ -112,7 +112,7 @@ export default function JobDetails() {
   if (loading) return <CircularProgress />;
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="Job Title"
@@ -133,7 +133,7 @@ export default function JobDetails() {
           </TextField>
         </Grid>
 
-        <Grid item size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="Employment Status"
             name="employmentStatus"

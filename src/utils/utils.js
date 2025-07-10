@@ -1,4 +1,4 @@
-export const validateUserInput = (formValues) => {
+export const validateUserInput = (formValues, isUpdate = false) => {
   const newErrors = {};
   if (!formValues.name.trim()) newErrors.name = "UserName is required";
   if (!formValues.email.trim()) newErrors.email = "Email is required";
@@ -9,7 +9,7 @@ export const validateUserInput = (formValues) => {
     newErrors.phone = "Must be 10 digits";
   if (!formValues.role) newErrors.role = "Role is required";
   if (!formValues.department) newErrors.department = "Department is required";
-  if (!formValues.password || formValues.password.length < 6)
+  if (!isUpdate & (!formValues.password || formValues.password.length < 6))
     newErrors.password = "Password must be at least 6 characters";
   return [Object.keys(newErrors).length === 0, newErrors];
 };

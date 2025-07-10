@@ -20,6 +20,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import api from "../../services/api";
+import Notification from "../../components/Notification"; // Adjust the import path as necessary
 
 // Dummy employee data
 const initialEmployees = Array.from({ length: 25 }).map((_, i) => ({
@@ -32,12 +33,13 @@ const initialEmployees = Array.from({ length: 25 }).map((_, i) => ({
 export default function UserList() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
   const [search, setSearch] = useState("");
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notif, setNotif] = useState({ open: false, severity: "error", message: "" });
+  const [totalCount, setTotalCount] = useState()
 
   const fetchUsers = async (query = "") => {
     setLoading(true);
@@ -49,7 +51,8 @@ export default function UserList() {
       } else {
         data = await api.getAllUsersByKey(query);
       }
-      setUsers(data);
+      setUsers(data?.items || []);
+      setTotalCount(data?.total || 0)
     } catch (err) {
       setError(err.message);
     } finally {
@@ -59,20 +62,27 @@ export default function UserList() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page, rowsPerPage]);
 
   const handleEdit = (id) => {
-    navigate(`/admin/edit/${id}`);
+    navigate(`/admin/user/edit/${id}`);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this employee?")) {
-      setEmployees((prev) => prev.filter((e) => e.id !== id));
+  const handleDelete = async(id) => {
+    if (window.confirm(`Are you sure you want to delete this employee - ${id}?`)) {
+      try {
+        const res = await api.deleteUser(id);
+        setNotif({ open: true, message: res.msg || "Successfully deleted user", severity: "success" });
+      } catch (err) {
+        setNotif({ open: true, message: err.message || "Failed to delete user", severity: "error" });
+      }
+      await api.deleteUser(id);
+      fetchUsers();
     }
   };
 
   const handleAdd = () => {
-    navigate("/admin/add");
+    navigate("/admin/user/add");
     // const nextId = employees.length ? employees[employees.length - 1].id + 1 : 1;
     // const newEmployee = {
     //   id: nextId,
@@ -104,7 +114,7 @@ export default function UserList() {
         justifyContent="space-between"
         alignItems="center"
         spacing={2}
-        mb={2}
+        mb={6}
       >
         <Typography variant="h6">User Information</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
@@ -186,7 +196,7 @@ export default function UserList() {
 
           <TablePagination
             component="div"
-            count={users.length}
+            count={totalCount}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
@@ -194,6 +204,12 @@ export default function UserList() {
           />
         </>
       )}
+       <Notification
+              open={notif.open}
+              onClose={() => setNotif({ ...notif, open: false })}
+              severity={notif.severity}
+              message={notif.message}
+            />
     </Paper>
   );
 }

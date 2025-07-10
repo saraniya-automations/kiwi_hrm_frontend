@@ -48,7 +48,7 @@ export default function UserAdd() {
     try {
       const users = await api.addUser(formValues);
       setNotif({ open: true, message: users.msg || "Successfuly Added user", severity: "success" });
-      navigate("/admin");
+      navigate("/admin/user");
     } catch (err) {
       setNotif({ open: true, message: err.message || "Failed to Add user", severity: "error" });
     }
@@ -66,7 +66,6 @@ export default function UserAdd() {
 
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
-          {/* Full Name */}
           <Grid size={{ xs: 12 }}>
             <TextField
               name="name"
@@ -78,8 +77,6 @@ export default function UserAdd() {
               helperText={formErrors.name}
             />
           </Grid>
-
-          {/* Email */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               name="email"
@@ -91,8 +88,6 @@ export default function UserAdd() {
               helperText={formErrors.email}
             />
           </Grid>
-
-          {/* Phone */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               name="phone"
@@ -104,8 +99,6 @@ export default function UserAdd() {
               helperText={formErrors.phone}
             />
           </Grid>
-
-          {/* Role */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               select
@@ -124,8 +117,6 @@ export default function UserAdd() {
               ))}
             </TextField>
           </Grid>
-
-          {/* Department */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               select
@@ -144,8 +135,6 @@ export default function UserAdd() {
               ))}
             </TextField>
           </Grid>
-
-          {/* Password */}
           <Grid size={{ xs: 12 }}>
             <TextField
               name="password"
@@ -159,7 +148,6 @@ export default function UserAdd() {
             />
           </Grid>
 
-          {/* Buttons */}
           <Grid
             size={{ xs: 12 }}
             sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}

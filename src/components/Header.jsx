@@ -11,15 +11,22 @@ import {
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import PersonPinIcon from '@mui/icons-material/PersonPin';
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import useAuthStore from "../store/authStore";
+
 
 const user = {
-  name: "John Doe",
+  name: "SB",
   avatarUrl: "https://i.pravatar.cc/150?img=3",
 };
 
 export default function Header() {
+  const eId = useAuthStore((state) => state.user?.employee_id) || "employee";
+  const eName = useAuthStore((state) => state.user?.name) || eId;
+
+
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -33,6 +40,7 @@ export default function Header() {
   const handleSignOut = () => {
       handleMenuClose();
       // Add sign-out logic here
+      useAuthStore.getState().logout();
       alert("Signed out");
       navigate("/login");
     };
@@ -47,7 +55,7 @@ export default function Header() {
           KiWi HRM
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body1">{user.name}</Typography>
+          <Typography variant="body1">{eName}</Typography>
           <IconButton onClick={handleMenuOpen}>
             <Avatar src={user.avatar} />
             <ArrowDropDownIcon sx={{ color: "white" }} />
@@ -59,7 +67,13 @@ export default function Header() {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            <MenuItem disabled>{user.name}</MenuItem>
+            <MenuItem disabled>{eName}</MenuItem>
+            <MenuItem onClick={()=>navigate(`/employee/pim/edit/${eId}/personal`)}>
+              <ListItemIcon>
+                <PersonPinIcon fontSize="small" />
+              </ListItemIcon>
+              My Profile
+            </MenuItem>
             <MenuItem onClick={handleSignOut}>
               <ListItemIcon>
                 <LogoutIcon fontSize="small" />

@@ -3,7 +3,7 @@ import { Box, Grid, Card, CardContent, Typography, Paper } from "@mui/material";
 import { LineChart, PieChart, BarChart, axisClasses } from "@mui/x-charts";
 import api from "../services/api";
 
-export default function Dashboard() {
+export default function DashboardAdmin() {
   const [stats, setStats] = useState({})
   const [weeklyAttendance, setWeeklyAttendance] = useState([])
   const [empGrowth, setEmpGrowth] = useState([])
@@ -35,7 +35,7 @@ export default function Dashboard() {
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
-        Dashboard
+        Admin Dashboard
       </Typography>
 
       {/* Quick Stats */}

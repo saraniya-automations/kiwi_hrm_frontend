@@ -8,7 +8,16 @@ import {
   ListItemText,
   Toolbar,
 } from "@mui/material";
-import { Home, Groups, AssignmentInd, EventAvailable } from "@mui/icons-material";
+import {
+  Home,
+  Groups,
+  AssignmentInd,
+  EventAvailable,
+  EventBusy,
+  ModelTraining,
+  RequestQuote,
+  PersonPin,
+} from "@mui/icons-material";
 import { NavLink, useLocation } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 
@@ -16,26 +25,43 @@ const drawerWidth = 240;
 
 const allNavItems = {
   admin: [
-    { label: "Dashboard", path: "/", icon: <Home /> },
-    { label: "Admin", path: "/admin", icon: <AssignmentInd /> },
-    { label: "PIM", path: "/pim", icon: <Groups /> },
-    { label: "Attendance", path: "/attendance", icon: <EventAvailable /> },
+    { label: "Dashboard", path: "/admin", icon: <Home /> },
+    { label: "Admin", path: "/admin/user", icon: <AssignmentInd /> },
+    { label: "PIM", path: "/admin/pim", icon: <Groups /> },
+    {
+      label: "Attendance",
+      path: "/admin/attendance",
+      icon: <EventAvailable />,
+    },
+    {
+      label: "Performance",
+      path: "/admin/performance",
+      icon: <ModelTraining />,
+    },
+    { label: "Salary", path: "/admin/salary", icon: <RequestQuote /> },
+    { label: "Leaves", path: "/admin/leave", icon: <EventBusy /> },
   ],
   employee: [
-    { label: "Dashboard", path: "/", icon: <Home /> },
-    { label: "PIM", path: "/pim", icon: <Groups /> },
+    { label: "Dashboard", path: "/employee", icon: <Home /> },
+    {
+      label: "Attendance",
+      path: "/employee/attendance",
+      icon: <EventAvailable />,
+    },
+    {
+      label: "Performance",
+      path: "/employee/performance",
+      icon: <ModelTraining />,
+    },
+    { label: "Salary", path: "/employee/salary", icon: <RequestQuote /> },
+    { label: "Leaves", path: "/employee/leave", icon: <EventBusy /> },
   ],
 };
 
 export default function Sidebar() {
   const location = useLocation();
-  console.log(
-    "Current USER:",
-    useAuthStore((state) => state.user)
-  );
   const role =
     useAuthStore((state) => state.user?.role)?.toLowerCase() || "employee"; // Default to employee if no role found
-  console.log("Current ROLE:", role);
   const navItems = allNavItems[role] || [];
 
   return (

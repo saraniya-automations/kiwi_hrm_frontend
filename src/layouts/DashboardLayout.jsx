@@ -22,6 +22,7 @@ export default function DashboardLayout() {
           flexGrow: 1,
           p: 3,
           minHeight: "100vh",
+          width: "100vh"
         }}
       >
         <Toolbar />

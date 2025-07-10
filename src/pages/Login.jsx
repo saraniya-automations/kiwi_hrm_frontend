@@ -18,6 +18,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
+  const eRole = useAuthStore((state) => state?.user?.role);
 
   const handleSubmit = async(e) => {
     e.preventDefault();
@@ -31,7 +32,14 @@ export default function Login() {
       return;
     }
     // Redirect to home page on successful login
-    navigate("/");
+    if (eRole?.toLowerCase() === 'admin'){
+      navigate("/admin");
+    } else if (eRole?.toLowerCase() === 'employee'){
+      navigate("/employee");
+    } else {
+      navigate("/");
+    }
+    
   };
 
   return (

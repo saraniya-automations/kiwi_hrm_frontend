@@ -32,7 +32,7 @@ const initialEmployees = Array.from({ length: 25 }).map((_, i) => ({
 
 export default function EmployeeList() {
   const [employees, setEmployees] = useState();
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState(""); // Search query
   const [loading, setLoading] = useState(true);
@@ -55,10 +55,10 @@ export default function EmployeeList() {
 
   useEffect(() => {
     fetchEmployees();
-  }, []);
+  }, [page, rowsPerPage]);
 
   const handleEdit = (id) => {
-    navigate(`/pim/edit/${id}/personal`);
+    navigate(`/admin/pim/edit/${id}/personal`);
   };
 
   const handleDelete = (id) => {
@@ -95,6 +95,7 @@ export default function EmployeeList() {
         alignItems="center"
         spacing={2}
         mb={2}
+        width={"100%"}
       >
         <Typography variant="h6">Employee Information</Typography>
       </Stack>

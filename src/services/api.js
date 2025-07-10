@@ -23,7 +23,8 @@ async function request(path, options = {}) {
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.message || "Something went wrong");
+    console.error("API Error:", JSON.stringify(data));
+    throw new Error(data?.error || "Something went wrong");
   }
 
   return res.json();
@@ -90,12 +91,9 @@ const api = {
       const res = await request(`/users/${id}`, {
         method: "PUT",
         headers: {
-          "Content-Type":
-            data instanceof FormData
-              ? "multipart/form-data"
-              : "application/json",
+          "Content-Type": "application/json",
         },
-        body: data instanceof FormData ? data : JSON.stringify(data),
+        body: JSON.stringify(data),
       });
       return res;
     } catch (error) {
@@ -103,9 +101,22 @@ const api = {
     }
   },
 
-  getEmployees: async (limit=10, offset=0, key='') => {
+  deleteUser: async (id) => {
     try {
-      const res = await request(`/profiles?limit=${limit}&offset=${offset}&key=${key}`);
+      const res = await request(`/users/${id}`, {
+        method: "DELETE",
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to delete user");
+    }
+  },
+
+  getEmployees: async (limit = 10, offset = 0, key = "") => {
+    try {
+      const res = await request(
+        `/profiles?limit=${limit}&offset=${offset}&key=${key}`
+      );
       return res;
     } catch (error) {
       throw new Error(error.message || "Failed to fetch employees");
@@ -122,7 +133,7 @@ const api = {
   },
 
   updateEmployee: async (id, data) => {
-    try { 
+    try {
       const res = await request(`/profile/${id}`, {
         method: "PUT",
         headers: {
@@ -133,7 +144,7 @@ const api = {
         },
         body: data instanceof FormData ? data : JSON.stringify(data),
       });
-      return res
+      return res;
     } catch (error) {
       throw new Error(error.message || "Failed to update employee");
     }
@@ -151,6 +162,257 @@ const api = {
     if (!res.ok) throw new Error("Failed to delete employee");
     return res.json();
   },
+
+  getAttendanceByFilter: async (name = "", start_date = "", end_date = "") => {
+    try {
+      const res = await request(
+        `/attendance/search?name=${name}&start_date=${start_date}&end_date=${end_date}`
+      );
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch attendance records");
+    }
+  },
+
+  getMyAttendanceByFilter: async (start_date = "", end_date = "") => {
+    try {
+      const res = await request(`/attendance/my-records?start_date=${start_date}&end_date=${end_date}`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+  getPendingAttendance: async () => {
+    try {
+      const res = await request(`/attendance/requests`);
+      return res;
+    } catch (error) {
+      throw new Error(
+        error.message || "Failed to fetch pending attendance records"
+      );
+    }
+  },
+
+  addManualAttendance: async (data) => {
+    try {
+      const res = await request(`/attendance/manual`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to add manual attendance");
+    }
+  },
+
+  updateAttendanceStatusApprove: async (id) => {
+    try {
+      const res = await request(`/attendance/approve/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to update attendance status");
+    }
+  },
+
+  updateAttendanceStatusReject: async (id, rejection_reason) => {
+    try {
+      const res = await request(`/attendance/reject/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rejection_reason }),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to update attendance status");
+    }
+  },
+
+  addSalary: async (data) => {
+    try {
+      const res = await request(`/salary/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to add salary");
+    }
+  },
+
+  getAllSalary: async (page, per_page) => {
+    try {
+      const res = await request(
+        `/salary/employee?page=${page}&per_page=${per_page}`
+      );
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+  exportSalary: async (id, month) => {
+    const token = getToken();
+    try {
+      const res = await fetch(
+        `${BASE_URL}/salary/export-pdf?employee_id=${id}&month=${month}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/pdf",
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to export salary");
+    }
+  },
+
+  getSalaryByFilter: async (id = "", month = "") => {
+    try {
+      const res = await request(
+        `/salary/employee/${id}?month=${month}`
+      );
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch attendance records");
+    }
+  },
+
+  downloadMySalary: async (month) => {
+    const token = getToken();
+    try {
+      const res = await fetch(
+        `${BASE_URL}/salary/my-records/payslip?month=${month}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/pdf",
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to download salary");
+    }
+  },
+
+  getMySalaryByFilter: async (month = "") => {
+    try {
+      const res = await request(
+        `/salary/my-records?month=${month}`
+      );
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch attendance records");
+    }
+  },
+
+  applyLeave: async (data) => {
+    try {
+      const res = await request(`/leave/apply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error || "Failed to apply leave");
+    }
+  },
+
+  getPendingLeave: async () => {
+    try {
+      const res = await request(`/leave/pending`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+  updateLeaveStatus: async (id, status) => {
+    try {
+      const res = await request(`/leave/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to update attendance status");
+    }
+  },
+
+  getLeaveByFilter: async (name, start_date, end_date) => {
+    try {
+      const res = await request(
+        `/leave/search?name=${name}&start_date=${start_date}&end_date=${end_date}`
+      );
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch leave");
+    }
+  },
+
+  getDashboardStats: async () => {
+    try {
+      const res = await request(`/dashboard/stats`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+  getDashboardEmpGrowth: async () => {
+    try {
+      const res = await request(`/dashboard/employee-growth`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+  getDashboardDepartment: async () => {
+    try {
+      const res = await request(`/dashboard/department-counts`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+  getDashboardWeekly: async () => {
+    try {
+      const res = await request(`/attendance/weekly-chart`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+
 };
 
 export default api;
