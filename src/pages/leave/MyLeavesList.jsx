@@ -38,7 +38,7 @@ const dummyLeaves = [
   // Add more entries here
 ];
 
-export default function LeavesList() {
+export default function MyLeavesList() {
   const [leaves, setLeaves] = useState(dummyLeaves);
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -50,10 +50,10 @@ export default function LeavesList() {
     message: "",
   });
 
-  const fetchPendingLeaves = async () => {
+  const fetchLeaves = async () => {
     try {
-    const res = await api.getPendingLeave()
-    setLeaves(res)
+    const res = await api.getMyLeave()
+    setLeaves(res?.items)
     } catch (err) {
       setNotif({
         open: true,
@@ -64,46 +64,8 @@ export default function LeavesList() {
   }
 
   useEffect(()=>{
-    fetchPendingLeaves();
+    fetchLeaves();
   }, [])
-
-  const handleApprove = async (id) => {
-    try {
-      const res = await api.updateLeaveStatus(id, 'Approved')
-      fetchPendingLeaves()
-    } catch (err) {
-
-    }
-    
-  };
-
-  const handleReject = async (id) => {
-    if (window.confirm(`Are you sure you want to reject this leave - ${id}?`)) {
-      try {
-        const res = await api.updateLeaveStatus(id, 'Rejected');
-        setNotif({ open: true, message: res.msg || "Successfully deleted user", severity: "success" });
-      } catch (err) {
-        setNotif({ open: true, message: err.message || "Failed to delete user", severity: "error" });
-      }
-      fetchUsers();
-    }
-  };
-
-  const handleSearch = async(query) => {
-    const {name, startDate, endDate} = query
-    try {
-      if (!name && !startDate && !endDate) {
-        // If no filters, reset to initial data
-        setFilteredData([]); // Reset filtered data
-      } else {
-        // Fetch data based on provided filters   
-        const res = await api.getLeaveByFilter(name, startDate, endDate);
-        setFilteredData(res)
-      }
-    } catch (err) {
-
-    }
-  };
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -112,112 +74,30 @@ export default function LeavesList() {
       </Typography>
 
       <ApplyLeave
-        onSubmit={() => fetchPendingLeaves()}
+        onSubmit={() => fetchLeaves()}
       />
 
-      <Paper elevation={3} sx={{ padding: 3, marginBottom: 6 }}>
-        <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
-          View Employee Leaves
-        </Typography>
-
-        <LeaveFilter onSearch={handleSearch} />
-
-        <TableContainer component={Paper}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Employee</TableCell>
-                <TableCell>Leave Type</TableCell>
-                <TableCell>Start date</TableCell>
-                <TableCell>End Date</TableCell>
-                <TableCell>Leave Reson</TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {filteredData?.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.leave_type}</TableCell>
-                  <TableCell>{row.start_date}</TableCell>
-                  <TableCell>{row.end_date}</TableCell>
-                  <TableCell>{row.reason}</TableCell>
-                  {/* <TableCell>
-                    <Chip
-                      label={
-                        STATUS_MAP[row.approval_status?.toLowerCase()]?.label
-                      }
-                      color={
-                        STATUS_MAP[row.approval_status?.toLowerCase()]?.color
-                      }
-                      size="small"
-                    />
-                  </TableCell> */}
-                </TableRow>
-              ))}
-
-              {filteredData.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No attendance records found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-
       <Paper sx={{ p: 4 }}>
-        <Typography variant="h6">Pending Leaves</Typography>
+        <Typography variant="h6">My Leaves</Typography>
         <Box mt={2}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Leave Id</TableCell>
-                <TableCell>Employee Id</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Type</TableCell>
                 <TableCell>Dates</TableCell>
                 <TableCell>Reason</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {leaves?.map((leave) => (
-                <TableRow key={leave.id}>
-                  <TableCell>{leave.id}</TableCell>
-                  <TableCell>{leave.employee_id}</TableCell>
+              {leaves?.map((leave, i) => (
+                <TableRow key={i}>
                   <TableCell>{leave.name}</TableCell>
                   <TableCell>{leave.leave_type}</TableCell>
                   <TableCell>
                     {leave.start_date} to {leave.end_date}
                   </TableCell>
                   <TableCell>{leave.reason}</TableCell>
-                  <TableCell>{leave.status}</TableCell>
-                  <TableCell align="center">
-                    {leave.status === "Pending" && (
-                      <>
-                        <Tooltip title="Approve">
-                          <IconButton
-                            color="success"
-                            onClick={() => handleApprove(leave.id)}
-                          >
-                            <Done />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Reject">
-                          <IconButton
-                            color="error"
-                            onClick={() => handleReject(leave.id)}
-                          >
-                            <Clear />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
