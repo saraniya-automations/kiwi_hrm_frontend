@@ -143,7 +143,7 @@ export default function AttendancePage() {
       
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 6 }}>
         <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
-          View Attendance
+          View My Attendance
         </Typography>
 
         <AttendanceFilter onSearch={handleSearch} itIsMy={true} />

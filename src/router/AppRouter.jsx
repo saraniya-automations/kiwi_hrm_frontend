@@ -32,6 +32,8 @@ import EmployeeSalaryList from "../pages/salary/EmployeeSalaryList";
 import AddSalary from "../pages/salary/AddSalary";
 import MyAttendanceList from "../pages/attendance/MyAttendanceList"
 import MySalaryList from "../pages/salary/MySalaryList"
+import AdminCourseApprovals from "../pages/performance/AdminCourseApprovals"
+import MyLeavesList from "../pages/leave/MyLeavesList"
 
 const pim = {
   path: "edit/:id",
@@ -71,8 +73,9 @@ const router = createBrowserRouter([
     path: "/",
     element: <DashboardLayout />,
     children: [
-      { index: true, element: <Home /> },
-
+      { element: <ProtectedRoute allowedRoles={["admin", "employee"]} />,
+      children: [{ index: true, element: <Dashboard />}]
+    },
       // Admin routes (only for 'admin')
       {
         path: "admin",
@@ -101,7 +104,11 @@ const router = createBrowserRouter([
           },
           {
             path: "performance",
-            element: <EmployeeCourses />,
+            children: [
+              { index: true, element: <AdminCourseApprovals />},
+              { path: "my", element: <EmployeeCourses /> },
+            ],
+            
           },
           {
             path: "salary",
@@ -137,6 +144,18 @@ const router = createBrowserRouter([
             path: "salary",
             children: [
               { index: true, element: <MySalaryList /> }
+            ],
+          },
+          {
+            path: "performance",
+            children: [
+              { index: true, element: <EmployeeCourses /> }
+            ],
+          },
+          {
+            path: "leave",
+            children: [
+              { index: true, element: <MyLeavesList /> }
             ],
           },
         ],

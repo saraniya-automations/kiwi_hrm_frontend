@@ -83,9 +83,16 @@ export default function PersonalDetails() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setForm({ ...form, image: URL.createObjectURL(file) });
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64String = reader.result;
+      setForm({ ...form, image: base64String});
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {

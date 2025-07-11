@@ -59,9 +59,9 @@ const api = {
     }
   },
 
-  getAllUsers: async () => {
+  getAllUsers: async (limit = 10, offset = 0) => {
     try {
-      const res = await request(`/users`);
+      const res = await request(`/users?limit=${limit}&offset=${offset}`);
       return res;
     } catch (error) {
       throw new Error(error.message || "Failed to fetch users");
@@ -176,7 +176,9 @@ const api = {
 
   getMyAttendanceByFilter: async (start_date = "", end_date = "") => {
     try {
-      const res = await request(`/attendance/my-records?start_date=${start_date}&end_date=${end_date}`);
+      const res = await request(
+        `/attendance/my-records?start_date=${start_date}&end_date=${end_date}`
+      );
       return res;
     } catch (error) {
       throw new Error(error.message || "Failed to fetch salary");
@@ -286,9 +288,7 @@ const api = {
 
   getSalaryByFilter: async (id = "", month = "") => {
     try {
-      const res = await request(
-        `/salary/employee/${id}?month=${month}`
-      );
+      const res = await request(`/salary/employee/${id}?month=${month}`);
       return res;
     } catch (error) {
       throw new Error(error.message || "Failed to fetch attendance records");
@@ -317,9 +317,7 @@ const api = {
 
   getMySalaryByFilter: async (month = "") => {
     try {
-      const res = await request(
-        `/salary/my-records?month=${month}`
-      );
+      const res = await request(`/salary/my-records?month=${month}`);
       return res;
     } catch (error) {
       throw new Error(error.message || "Failed to fetch attendance records");
@@ -412,7 +410,89 @@ const api = {
     }
   },
 
+  getPerfMyCourse: async () => {
+    try {
+      const res = await request(`/performance/my-course`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch Performance");
+    }
+  },
 
+  getPerfSubPending: async () => {
+    try {
+      const res = await request(`/performance/submissions/pending`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch salary");
+    }
+  },
+
+  getPerfSubAll: async () => {
+    try {
+      const res = await request(`/performance/submissions/all`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch Performance");
+    }
+  },
+
+  getPerfSubMy: async () => {
+    try {
+      const res = await request(`/performance/my-submissions`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch Performance");
+    }
+  },
+
+  submitCourseComplete: async (data) => {
+    try {
+      const res = await request(`/performance/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error || "Failed to submit");
+    }
+  },
+
+  updatePrefStatus: async (id, data) => {
+    try {
+      const res = await request(`/performance/submissions/${id}/review`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to update attendance status");
+    }
+  },
+
+  getMyLeave: async () => {
+    try {
+      const res = await request(`/leave/my`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch Leave");
+    }
+  },
+
+  getLeaveBalance: async () => {
+    try {
+      const res = await request(`/leave/balance`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch Leave");
+    }
+  },
 };
 
 export default api;
