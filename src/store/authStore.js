@@ -16,7 +16,12 @@ const useAuthStore = create((set) => ({
         throw new Error("Invalid login response");
       }
       localStorage.setItem("token", data.access_token);
-      set({ user: jwtDecode(data.access_token)?.sub, token: data.access_token });
+      if (data?.employee_id) {
+        const userInfo = await api.getEmployeeById(data?.employee_id);
+        set({ user: {...data, ...userInfo}, token: data.access_token });
+      } else {
+        set({ user: jwtDecode(data.access_token)?.sub, token: data.access_token });
+      }
       return { success: true };
     } catch (err) {
       return { success: false, message: err.message };
@@ -28,16 +33,6 @@ const useAuthStore = create((set) => ({
     localStorage.removeItem("token");
     set({ user: null, token: null });
     window.location.href = "/login"; // Redirect to login page
-  },
-
-  setUser: (user) => {
-    localStorage.setItem("user", JSON.stringify(user));
-    set({ user });
-  },
-
-  setToken: (token) => {
-    localStorage.setItem("token", token);
-    set({ token });
   },
 }));
 

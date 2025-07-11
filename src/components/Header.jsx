@@ -24,6 +24,7 @@ const user = {
 
 export default function Header() {
   const eId = useAuthStore((state) => state.user?.employee_id) || "employee";
+  const userInfo = useAuthStore((state) => state.user) || {};
   const eName = useAuthStore((state) => state.user?.name) || eId;
 
 
@@ -51,13 +52,13 @@ export default function Header() {
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" noWrap>
+        <Typography variant="h6" sx={{ cursor: "pointer" }} noWrap onClick={()=>navigate("/")}>
           KiWi HRM
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="body1">{eName}</Typography>
           <IconButton onClick={handleMenuOpen}>
-            <Avatar src={user.avatar} />
+            <Avatar src={userInfo?.personal_details ? JSON.parse(userInfo.personal_details)?.image : ""} />
             <ArrowDropDownIcon sx={{ color: "white" }} />
           </IconButton>
           <Menu

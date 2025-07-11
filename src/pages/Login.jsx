@@ -20,7 +20,7 @@ export default function Login() {
   const login = useAuthStore((state) => state.login);
   const eRole = useAuthStore((state) => state?.user?.role);
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const email = data.get("email");
@@ -32,14 +32,7 @@ export default function Login() {
       return;
     }
     // Redirect to home page on successful login
-    if (eRole?.toLowerCase() === 'admin'){
-      navigate("/admin");
-    } else if (eRole?.toLowerCase() === 'employee'){
-      navigate("/employee");
-    } else {
-      navigate("/");
-    }
-    
+    navigate("/");
   };
 
   return (
@@ -51,7 +44,8 @@ export default function Login() {
         sm={4}
         md={7}
         sx={{
-          backgroundImage: "url(https://source.unsplash.com/random/?technology)",
+          backgroundImage:
+            "url(https://source.unsplash.com/random/?technology)",
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -59,15 +53,7 @@ export default function Login() {
       />
 
       {/* Right Side: Login Form */}
-      <Grid
-        item
-        xs={12}
-        sm={8}
-        md={5}
-        component={Paper}
-        elevation={6}
-        square
-      >
+      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <Box
           sx={{
             my: 8,

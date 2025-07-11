@@ -22,19 +22,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import api from "../../services/api";
 import Notification from "../../components/Notification"; // Adjust the import path as necessary
 
-// Dummy employee data
-const initialEmployees = Array.from({ length: 25 }).map((_, i) => ({
-  id: i + 1,
-  name: `Employee ${i + 1}`,
-  position: "Software Engineer",
-  department: "Development",
-}));
 
 export default function UserList() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(50);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,10 +40,11 @@ export default function UserList() {
     try {
       let data;
       if (query.trim() === "") {
-        data = await api.getAllUsers();
+        data = await api.getAllUsers(rowsPerPage, page+1);
       } else {
         data = await api.getAllUsersByKey(query);
       }
+      console.log(data, "data")
       setUsers(data?.items || []);
       setTotalCount(data?.total || 0)
     } catch (err) {
@@ -158,7 +152,6 @@ export default function UserList() {
               </TableHead>
               <TableBody>
                 {users
-                  ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   ?.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>{user.employee_id}</TableCell>

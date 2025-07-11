@@ -22,21 +22,15 @@ import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import api from "../../services/api";
 
-// Dummy employee data
-const initialEmployees = Array.from({ length: 25 }).map((_, i) => ({
-  id: i + 1,
-  name: `Employee ${i + 1}`,
-  position: "Software Engineer",
-  department: "Development",
-}));
 
 export default function EmployeeList() {
   const [employees, setEmployees] = useState();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState(""); // Search query
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [totalCount, setTotalCount] = useState(0)
 
   const navigate = useNavigate();
 
@@ -44,8 +38,9 @@ export default function EmployeeList() {
     setLoading(true);
     setError("");
     try {
-      const data = await api.getEmployees(rowsPerPage, page, search)
-      setEmployees(data);
+      const data = await api.getEmployees(rowsPerPage, page+1, search)
+      setEmployees(data?.items);
+      setTotalCount(data?.total)
     } catch (err) {
       setError(err.message);
     } finally {
@@ -121,19 +116,18 @@ export default function EmployeeList() {
             <TableRow>
               <TableCell>Employee ID</TableCell>
               <TableCell>Name</TableCell>
-              <TableCell>Position</TableCell>
+              <TableCell>Role</TableCell>
               <TableCell>Department</TableCell>
               <TableCell align="right">View</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {employees
-              ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               ?.map((employee) => (
                 <TableRow key={employee.id}>
                   <TableCell>{employee.user_id}</TableCell>
                   <TableCell>{employee.name}</TableCell>
-                  <TableCell>{employee.position}</TableCell>
+                  <TableCell>{employee.role}</TableCell>
                   <TableCell>{employee.department}</TableCell>
                   <TableCell align="right">
                     <IconButton

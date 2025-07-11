@@ -24,14 +24,14 @@ export default function EmployeeSalaryList() {
   const navigate = useNavigate();
   const [salaries, setSalaries] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(50); // Default rows per page
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Default rows per page
   const [totalCount, setTotalCount] = useState(0);
   const [filteredData, setFilteredData] = useState([]);
 
   async function fetchSalary(page = 0, rowsPerPage = 10) {
     //   const res = await api.get("/salary/my");
-    const res = await api.getAllSalary(page, rowsPerPage);
-    setSalaries(res.items || []);
+    const res = await api.getAllSalary(page+1, rowsPerPage);
+    setSalaries(res?.items || []);
     setTotalCount(res.total || 0);
   }
   useEffect(() => {
@@ -67,11 +67,8 @@ export default function EmployeeSalaryList() {
         // Fetch data based on provided filters
         try {
           const res = await api.getSalaryByFilter(id, `${year}-${month}`);
-          if (Array.isArray(res)) {
-            setFilteredData(res);
-          } else if(res instanceof Object && res.constructor === Object) {
-            console.log([res])
-            setFilteredData([res]);
+          if (Array.isArray(res?.items)) {
+            setFilteredData(res?.items);
           } else {
             alert(res.message);
           }
@@ -89,37 +86,6 @@ export default function EmployeeSalaryList() {
       </Typography>
 
       <AddSalary onSubmit={fetchSalary} />
-
-      {/* <Paper sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h6">My Salary Slips</Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Year</TableCell>
-              <TableCell>Month</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Download</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {salaries.map((s) => (
-              <TableRow key={s.id}>
-                <TableCell>{s.year}</TableCell>
-                <TableCell>{s.month}</TableCell>
-                <TableCell>${s.amount}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleDownload(s.id)}
-                  >
-                    Download
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper> */}
 
       <Paper elevation={3} sx={{ padding: 3, marginTop: 4 }}>
         <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
