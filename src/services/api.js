@@ -146,7 +146,7 @@ const api = {
       });
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to update employee");
+      throw new Error(error.message || "Failed to update");
     }
   },
 
@@ -170,7 +170,7 @@ const api = {
       );
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch attendance records");
+      throw new Error(error.message || "Failed to fetch records");
     }
   },
 
@@ -181,17 +181,28 @@ const api = {
       );
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
-  getPendingAttendance: async () => {
+  getPendingAttendance: async (page, perpage) => {
     try {
-      const res = await request(`/attendance/requests`);
+      const res = await request(`/attendance/requests?page=${page}&per_page=${perpage}`);
       return res;
     } catch (error) {
       throw new Error(
-        error.message || "Failed to fetch pending attendance records"
+        error.message || "Failed to fetch pending records"
+      );
+    }
+  },
+
+  getAllMyAttendance: async (page, perpage) => {
+    try {
+      const res = await request(`/attendance/all-my-records?page=${page}&per_page=${perpage}`);
+      return res;
+    } catch (error) {
+      throw new Error(
+        error.message || "Failed to fetch records"
       );
     }
   },
@@ -207,7 +218,7 @@ const api = {
       });
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to add manual attendance");
+      throw new Error(error.message || "Failed to add");
     }
   },
 
@@ -221,7 +232,7 @@ const api = {
       });
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to update attendance status");
+      throw new Error(error.message || "Failed to update status");
     }
   },
 
@@ -236,7 +247,7 @@ const api = {
       });
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to update attendance status");
+      throw new Error(error.message || "Failed to update status");
     }
   },
 
@@ -251,7 +262,7 @@ const api = {
       });
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to add salary");
+      throw new Error(error.message || "Failed to add");
     }
   },
 
@@ -262,7 +273,7 @@ const api = {
       );
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -282,7 +293,7 @@ const api = {
       );
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to export salary");
+      throw new Error(error.message || "Failed to export");
     }
   },
 
@@ -291,7 +302,7 @@ const api = {
       const res = await request(`/salary/employee/${id}?month=${month}`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch attendance records");
+      throw new Error(error.message || "Failed to fetch records");
     }
   },
 
@@ -311,7 +322,7 @@ const api = {
       );
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to download salary");
+      throw new Error(error.message || "Failed to download");
     }
   },
 
@@ -320,7 +331,7 @@ const api = {
       const res = await request(`/salary/my-records?month=${month}`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch attendance records");
+      throw new Error(error.message || "Failed to fetch records");
     }
   },
 
@@ -339,12 +350,12 @@ const api = {
     }
   },
 
-  getPendingLeave: async () => {
+  getPendingLeave: async (page=1, per_page=10) => {
     try {
-      const res = await request(`/leave/pending`);
+      const res = await request(`/leave/pending?page=${page}&per_page=${per_page}`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -359,7 +370,7 @@ const api = {
       });
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to update attendance status");
+      throw new Error(error.message || "Failed to update status");
     }
   },
 
@@ -379,7 +390,7 @@ const api = {
       const res = await request(`/dashboard/stats`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -388,7 +399,7 @@ const api = {
       const res = await request(`/dashboard/employee-growth`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -397,7 +408,7 @@ const api = {
       const res = await request(`/dashboard/department-counts`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -406,7 +417,7 @@ const api = {
       const res = await request(`/attendance/weekly-chart`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -415,7 +426,7 @@ const api = {
       const res = await request(`/performance/my-course`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch Performance");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -424,7 +435,7 @@ const api = {
       const res = await request(`/performance/submissions/pending`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch salary");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -433,7 +444,7 @@ const api = {
       const res = await request(`/performance/submissions/all`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch Performance");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -442,7 +453,7 @@ const api = {
       const res = await request(`/performance/my-submissions`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch Performance");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -472,7 +483,7 @@ const api = {
       });
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to update attendance status");
+      throw new Error(error.message || "Failed to update status");
     }
   },
 
@@ -481,7 +492,7 @@ const api = {
       const res = await request(`/leave/my`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch Leave");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
 
@@ -490,9 +501,58 @@ const api = {
       const res = await request(`/leave/balance`);
       return res;
     } catch (error) {
-      throw new Error(error.message || "Failed to fetch Leave");
+      throw new Error(error.message || "Failed to fetch");
     }
   },
+
+  getDashboadMy: async () => {
+    try {
+      const res = await request(`/employee/dashboard/summary`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch");
+    }
+  },
+
+  getDashboadSalaryCount: async () => {
+    try {
+      const res = await request(`/salary/countdown`);
+      return res;
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch");
+    }
+  },
+
+  forgotPassword: async (data) => {
+    try {
+      const res = await request(`/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error || "Failed to submit");
+    }
+  },
+
+  resetPassword: async (data) => {
+    try {
+      const res = await request(`/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return res;
+    } catch (error) {
+      throw new Error(error || "Failed to submit");
+    }
+  }
+
 };
 
 export default api;

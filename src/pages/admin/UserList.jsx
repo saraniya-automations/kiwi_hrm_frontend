@@ -110,7 +110,7 @@ export default function UserList() {
         spacing={2}
         mb={6}
       >
-        <Typography variant="h6">User Information</Typography>
+        <Typography variant="h6">User Management</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
           Add User
         </Button>

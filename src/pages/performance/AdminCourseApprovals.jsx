@@ -12,6 +12,7 @@ import {
   Typography,
   Stack,
   Box,
+  TablePagination,
 } from "@mui/material";
 import api from "../../services/api";
 import CourseApprovalModal from "./CourseApprovalModal";
@@ -24,17 +25,33 @@ export default function AdminCourseApprovals() {
   const [submissions, setSubmissions] = useState([]);
   const [allSubmissions, setAllSubmissions] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [notif, setNotif] = useState({ open: false, severity: "error", message: "" });
+  const [notif, setNotif] = useState({
+    open: false,
+    severity: "error",
+    message: "",
+  });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page1, setPage1] = useState(0);
+  const [rowsPerPage1, setRowsPerPage1] = useState(10);
+  const [totalCount1, setTotalCount1] = useState(0);
 
-  const fetchData = async () => {
-    const res = await api.getPerfSubPending();
-    const resAll = await api.getPerfSubAll()
+  const getPerfSubPending = async (page=1, pagelimt=10) => {
+    const res = await api.getPerfSubPending(page+1, pagelimt);
     setSubmissions(res?.items);
-    setAllSubmissions(resAll?.items)
+    setTotalCount(res?.total)
+  };
+
+  const getPerfSubAll = async (page=1, pagelimt=10) => {
+    const resAll = await api.getPerfSubAll(page+1, pagelimt);
+    setAllSubmissions(resAll?.items);
+    setTotalCount1(resAll?.total)
   };
 
   useEffect(() => {
-    fetchData();
+    getPerfSubAll();
+    getPerfSubPending();
   }, []);
 
   const handleAction = async (data, newdata) => {
@@ -45,21 +62,46 @@ export default function AdminCourseApprovals() {
         status: data.status,
         ...newdata,
       };
-  
+
       const res = await api.updatePrefStatus(data.id, payload);
-      setNotif({open: true,  severity: "success", message:  res?.message || "Updated successfully!"})
-      fetchData()
-
+      setNotif({
+        open: true,
+        severity: "success",
+        message: res?.message || "Updated successfully!",
+      });
+      fetchData();
     } catch (err) {
-      setNotif({open: true,  severity: "error", message:  err?.message || "Failed changes!"})
+      setNotif({
+        open: true,
+        severity: "error",
+        message: err?.message || "Failed changes!",
+      });
     }
+  };
 
-    
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+    getPerfSubPending(newPage, rowsPerPage)
+  }
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+    getPerfSubPending(0, parseInt(event.target.value, 10))
+  };
+
+  const handleChangePage1 = (event, newPage) => {
+    setPage1(newPage);
+    getPerfSubAll(newPage, rowsPerPage)
+  }
+  const handleChangeRowsPerPage1 = (event) => {
+    setRowsPerPage1(parseInt(event.target.value, 10));
+    setPage1(0);
+    getPerfSubAll(0, parseInt(event.target.value, 10))
   };
 
   return (
     <>
-      <Paper sx={{ p: 4 }}>
+      <Paper sx={{ p: 4, mb: 4 }}>
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -78,7 +120,8 @@ export default function AdminCourseApprovals() {
           </Button>
         </Stack>
       </Paper>
-      <Paper sx={{ p: 4 }}>
+
+      <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h6">Pending Review</Typography>
         <Table>
           <TableHead>
@@ -125,6 +168,14 @@ export default function AdminCourseApprovals() {
             ))}
           </TableBody>
         </Table>
+        <TablePagination
+          component="div"
+          count={totalCount}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </Paper>
 
       <Paper sx={{ p: 4 }}>
@@ -160,6 +211,14 @@ export default function AdminCourseApprovals() {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={totalCount1}
+            page={page1}
+            onPageChange={handleChangePage1}
+            rowsPerPage={rowsPerPage1}
+            onRowsPerPageChange={handleChangeRowsPerPage1}
+          />
         </Box>
       </Paper>
 

@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { Clear, Done } from "@mui/icons-material";
 import {
   Box,
-  Button,
   Chip,
-  Grid,
   IconButton,
   Paper,
   Table,
@@ -11,38 +9,18 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
-  TextField,
-  Typography,
   Tooltip,
+  Typography
 } from "@mui/material";
-import { Done, Clear } from "@mui/icons-material";
-import AttendanceFilter from "./AttendanceFilter"; // Assuming you have a filter component
-import ManualAttendanceForm from "./ManualAttendanceForm"; // Assuming you have a manual attendance form component
+import React, { useEffect, useState } from "react";
 import Notification from "../../components/Notification"; // Assuming you have a notification component
 import api from "../../services/api"; // Adjust the import path as necessary
-import RejectAttendanceModal from "./RejectAttendanceModal"; // Assuming you have a reject modal component
 import { STATUS_MAP } from "../../utils/constants"; // Assuming you have a constants file for status mapping
-
-// Sample initial data (replace with API call)
-const initialData = [
-  {
-    id: 1,
-    employee: "Alice Smith",
-    date: "2025-06-25",
-    checkIn: "09:01",
-    checkOut: "17:02",
-    status: "pending",
-  },
-  {
-    id: 2,
-    employee: "Bob Johnson",
-    date: "2025-06-25",
-    checkIn: "09:05",
-    checkOut: "16:55",
-    status: "approved",
-  },
-];
+import AttendanceFilter from "./AttendanceFilter"; // Assuming you have a filter component
+import ManualAttendanceForm from "./ManualAttendanceForm"; // Assuming you have a manual attendance form component
+import RejectAttendanceModal from "./RejectAttendanceModal"; // Assuming you have a reject modal component
 
 export default function AttendancePage() {
   const [pendingData, setPendingData] = useState([]);
@@ -55,11 +33,18 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDataByFilter = async (name, startDate, endDate) => {   
+  const fetchDataByFilter = async (name, startDate, endDate) => {
     setLoading(true);
     try {
-      const response = await api.getAttendanceByFilter(name, startDate, endDate); // Adjust API call as necessary
+      const response = await api.getAttendanceByFilter(
+        name,
+        startDate,
+        endDate
+      ); // Adjust API call as necessary
       setFilteredData(response || []);
     } catch (error) {
       console.error("Error fetching attendance data:", error);
@@ -72,11 +57,12 @@ export default function AttendancePage() {
       setLoading(false);
     }
   };
-  const fetchPendingData = async () => {   
+  const fetchPendingData = async () => {
     setLoading(true);
     try {
-      const response = await api.getPendingAttendance(); // Adjust API call as necessary
-      setPendingData(response || []);
+      const response = await api.getPendingAttendance(page+1, rowsPerPage);
+      setPendingData(response?.items || []);
+      setTotalCount(response?.total || 0)
     } catch (error) {
       console.error("Error fetching pending attendance data:", error);
       setNotif({
@@ -88,10 +74,16 @@ export default function AttendancePage() {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchPendingData();
-  }, []);
+  }, [page, rowsPerPage]);
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleSearch = (filters) => {
     const { name, startDate, endDate } = filters;
@@ -101,7 +93,7 @@ export default function AttendancePage() {
         // If no filters, reset to initial data
         setFilteredData([]); // Reset filtered data
       } else {
-        // Fetch data based on provided filters   
+        // Fetch data based on provided filters
         fetchDataByFilter(name, startDate, endDate);
       }
     } catch (error) {
@@ -111,10 +103,10 @@ export default function AttendancePage() {
         severity: "error",
         message: "Failed to apply filters",
       });
-    }   
+    }
   };
 
-  const handleAction = async({id, status, reason}) => {
+  const handleAction = async ({ id, status, reason }) => {
     try {
       if (status === "approved") {
         await api.updateAttendanceStatusApprove(id);
@@ -124,16 +116,16 @@ export default function AttendancePage() {
           message: "Attendance approved successfully",
         });
       } else if (status === "rejected") {
-        await api.updateAttendanceStatusReject(id, reason);          
+        await api.updateAttendanceStatusReject(id, reason);
         setNotif({
           open: true,
           severity: "success",
-          message: "Attendance rejected successfully",    
+          message: "Attendance rejected successfully",
         });
       }
       // Refresh pending data after action
       fetchPendingData();
-    } catch (error) {       
+    } catch (error) {
       console.error("Error updating attendance status:", error);
       setNotif({
         open: true,
@@ -211,8 +203,12 @@ export default function AttendancePage() {
                   <TableCell>{row.punch_out}</TableCell>
                   <TableCell>
                     <Chip
-                      label={STATUS_MAP[row.approval_status?.toLowerCase()]?.label}
-                      color={STATUS_MAP[row.approval_status?.toLowerCase()]?.color}
+                      label={
+                        STATUS_MAP[row.approval_status?.toLowerCase()]?.label
+                      }
+                      color={
+                        STATUS_MAP[row.approval_status?.toLowerCase()]?.color
+                      }
                       size="small"
                     />
                   </TableCell>
@@ -260,8 +256,12 @@ export default function AttendancePage() {
                   <TableCell>{row.created_at}</TableCell>
                   <TableCell>
                     <Chip
-                      label={STATUS_MAP[row?.approval_status?.toLowerCase()].label}
-                      color={STATUS_MAP[row?.approval_status?.toLowerCase()].color}
+                      label={
+                        STATUS_MAP[row?.approval_status?.toLowerCase()].label
+                      }
+                      color={
+                        STATUS_MAP[row?.approval_status?.toLowerCase()].color
+                      }
                       size="small"
                     />
                   </TableCell>
@@ -269,7 +269,9 @@ export default function AttendancePage() {
                     <Tooltip title="Approve">
                       <IconButton
                         color="success"
-                        onClick={() => handleAction({id:row.id, status: "approved"})}
+                        onClick={() =>
+                          handleAction({ id: row.id, status: "approved" })
+                        }
                       >
                         <Done />
                       </IconButton>
@@ -296,6 +298,14 @@ export default function AttendancePage() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={totalCount}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </Paper>
       <RejectAttendanceModal
         open={rejectModalOpen}

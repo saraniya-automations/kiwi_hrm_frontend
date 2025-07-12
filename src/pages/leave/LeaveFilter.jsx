@@ -71,6 +71,7 @@ export default function LeaveFilter({ onSearch }) {
               variant="contained"
               color="primary"
               onClick={handleSearch}
+              disabled={!Object.values(filters).every(value => String(value).trim() !== "")}
             >
               Search
             </Button>

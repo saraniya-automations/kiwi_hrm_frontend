@@ -15,6 +15,8 @@ import {
   TextField,
   Typography,
   Tooltip,
+  TablePagination,
+  CircularProgress,
 } from "@mui/material";
 import { Done, Clear, Edit, HourglassBottom } from "@mui/icons-material";
 import AttendanceFilter from "./AttendanceFilter"; // Assuming you have a filter component
@@ -24,36 +26,20 @@ import api from "../../services/api"; // Adjust the import path as necessary
 import RejectAttendanceModal from "./RejectAttendanceModal"; // Assuming you have a reject modal component
 import { STATUS_MAP } from "../../utils/constants"; // Assuming you have a constants file for status mapping
 
-// Sample initial data (replace with API call)
-const initialData = [
-  {
-    id: 1,
-    employee: "Alice Smith",
-    date: "2025-06-25",
-    checkIn: "09:01",
-    checkOut: "17:02",
-    status: "pending",
-  },
-  {
-    id: 2,
-    employee: "Bob Johnson",
-    date: "2025-06-25",
-    checkIn: "09:05",
-    checkOut: "16:55",
-    status: "approved",
-  },
-];
-
 export default function AttendancePage() {
   const [filteredData, setFilteredData] = useState([]);
+  const [allData, setAllData] = useState([]);
   const [notif, setNotif] = useState({
     open: false,
     severity: "error",
     message: "",
   });
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDataByFilter = async (startDate, endDate) => {   
+  const fetchDataByFilter = async (startDate, endDate) => {
     setLoading(true);
     try {
       const response = await api.getMyAttendanceByFilter(startDate, endDate); // Adjust API call as necessary
@@ -69,17 +55,18 @@ export default function AttendancePage() {
       setLoading(false);
     }
   };
-  const fetchPendingData = async () => {   
+  const fetchAllMyAtt = async () => {
     setLoading(true);
     try {
-      const response = await api.getPendingAttendance(); // Adjust API call as necessary
-      setPendingData(response || []);
+      const response = await api.getAllMyAttendance(page + 1, rowsPerPage); // Adjust API call as necessary
+      setAllData(response?.items || []);
+      setTotalCount(response?.total || 0);
     } catch (error) {
-      console.error("Error fetching pending attendance data:", error);
+      console.error("Error fetching attendance data:", error);
       setNotif({
         open: true,
         severity: "error",
-        message: "Failed to fetch pending attendance data",
+        message: "Failed to fetch attendance data",
       });
     } finally {
       setLoading(false);
@@ -94,7 +81,7 @@ export default function AttendancePage() {
         // If no filters, reset to initial data
         setFilteredData([]); // Reset filtered data
       } else {
-        // Fetch data based on provided filters   
+        // Fetch data based on provided filters
         fetchDataByFilter(startDate, endDate);
       }
     } catch (error) {
@@ -104,12 +91,13 @@ export default function AttendancePage() {
         severity: "error",
         message: "Failed to apply filters",
       });
-    }   
+    }
   };
 
   const handleManualAttendance = async (data) => {
     try {
       const res = await api.addManualAttendance(data);
+      fetchAllMyAtt();
       setNotif({
         open: true,
         severity: "success",
@@ -125,9 +113,19 @@ export default function AttendancePage() {
     }
   };
 
-  // const filteredData = data.filter((row) =>
-  //   row.employee.toLowerCase().includes(search.toLowerCase())
-  // );
+  useEffect(() => {
+    fetchAllMyAtt();
+  }, [page, rowsPerPage]);
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const data = filteredData?.length > 0 ? filteredData : allData;
+
+  if (loading) return <CircularProgress />;
 
   return (
     <Box sx={{ p: 4 }}>
@@ -140,7 +138,7 @@ export default function AttendancePage() {
           onSubmit={(data) => handleManualAttendance(data)}
         />
       </Box>
-      
+
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 6 }}>
         <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
           View My Attendance
@@ -160,22 +158,26 @@ export default function AttendancePage() {
             </TableHead>
 
             <TableBody>
-              {filteredData?.map((row) => (
+              {data?.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>{row.date}</TableCell>
                   <TableCell>{row.punch_in}</TableCell>
                   <TableCell>{row.punch_out}</TableCell>
                   <TableCell>
                     <Chip
-                      label={STATUS_MAP[row.approval_status?.toLowerCase()]?.label}
-                      color={STATUS_MAP[row.approval_status?.toLowerCase()]?.color}
+                      label={
+                        STATUS_MAP[row.approval_status?.toLowerCase()]?.label
+                      }
+                      color={
+                        STATUS_MAP[row.approval_status?.toLowerCase()]?.color
+                      }
                       size="small"
                     />
                   </TableCell>
                 </TableRow>
               ))}
 
-              {filteredData.length === 0 && (
+              {data.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     No attendance records found.
@@ -185,6 +187,16 @@ export default function AttendancePage() {
             </TableBody>
           </Table>
         </TableContainer>
+        {filteredData?.length === 0 && (
+          <TablePagination
+            component="div"
+            count={totalCount}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        )}
       </Paper>
 
       <Notification

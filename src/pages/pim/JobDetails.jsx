@@ -13,11 +13,7 @@ import Notification from "../../components/Notification"; // Adjust the import p
 import { useParams } from "react-router-dom";
 import api from "../../services/api"; // Adjust the import path as necessary
 import CircularProgress from "@mui/material/CircularProgress"; // Uncomment if you want to use loading spinner
-
-const jobTitles = ["Software Engineer", "Designer", "HR Manager"];
-const empStatuses = ["Full-Time", "Part-Time", "Contract", "Intern"];
-const jobCategories = ["IT", "Design", "HR", "Finance"];
-const locations = ["Auckland", "Wellington", "Remote"];
+import { EMP_STATUS, JOB_TITLE, DEPARTMENTS, NATIONALITIES} from "../../utils/constants"
 
 const initialForm = {
   jobTitle: "",
@@ -125,7 +121,7 @@ export default function JobDetails() {
             helperText={errors.jobTitle}
             InputProps={{ readOnly: !editModeOn }}
           >
-            {jobTitles.map((title) => (
+            {JOB_TITLE.map((title) => (
               <MenuItem key={title} value={title}>
                 {title}
               </MenuItem>
@@ -145,7 +141,7 @@ export default function JobDetails() {
             helperText={errors.employmentStatus}
             InputProps={{ readOnly: !editModeOn }}
           >
-            {empStatuses.map((status) => (
+            {EMP_STATUS.map((status) => (
               <MenuItem key={status} value={status}>
                 {status}
               </MenuItem>
@@ -165,7 +161,7 @@ export default function JobDetails() {
             helperText={errors.jobCategory}
             InputProps={{ readOnly: !editModeOn }}
           >
-            {jobCategories.map((cat) => (
+            {DEPARTMENTS.map((cat) => (
               <MenuItem key={cat} value={cat}>
                 {cat}
               </MenuItem>
@@ -183,7 +179,7 @@ export default function JobDetails() {
             onChange={handleChange}
             InputProps={{ readOnly: !editModeOn }}
           >
-            {locations.map((loc) => (
+            {NATIONALITIES.map((loc) => (
               <MenuItem key={loc} value={loc}>
                 {loc}
               </MenuItem>

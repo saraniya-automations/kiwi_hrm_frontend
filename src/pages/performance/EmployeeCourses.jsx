@@ -67,10 +67,11 @@ export default function EmployeeCourses() {
 
   return (
     <Box>
-      <Paper sx={{ p: 4 }}>
+      <Typography variant="h6" sx={{mb:3}}>My Performance</Typography>
+      <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h6">Mandatory Courses</Typography>
         <List>
-          {courses.map((course, i) => (
+          {courses?.length > 0 ? courses.map((course, i) => (
             <ListItem key={i}>
               <Box size={{ xs: 12 }}>
                 <ListItemText
@@ -87,7 +88,8 @@ export default function EmployeeCourses() {
                 </Button>
               </Box>
             </ListItem>
-          ))}
+          ))
+          : <Typography color="success" marginTop={3}>No Mandatory Courses</Typography>}
         </List>
         <SubmitCourseModal
           open={!!selected}

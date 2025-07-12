@@ -3,7 +3,7 @@ import { Box, Grid, TextField, Button } from "@mui/material";
 
 export default function AttendanceFilter({ onSearch, itIsMy }) {
   const [filters, setFilters] = useState({
-    name: "",
+    name: itIsMy ? "no" : "",
     startDate: "",
     endDate: "",
   });
@@ -64,7 +64,7 @@ export default function AttendanceFilter({ onSearch, itIsMy }) {
 
         <Grid size={{ xs: 12, sm: 3 }}>
           <Box display="flex" gap={2}>
-            <Button variant="contained" color="primary" onClick={handleSearch}>
+            <Button variant="contained" color="primary" onClick={handleSearch} disabled={!Object.values(filters).every(value => String(value).trim() !== "")}>
               Search
             </Button>
             <Button variant="outlined" onClick={handleClear}>

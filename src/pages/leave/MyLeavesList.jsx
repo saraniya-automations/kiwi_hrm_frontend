@@ -16,6 +16,7 @@ import {
   TextField,
   Stack,
   Modal,
+  TablePagination,
 } from "@mui/material";
 import LeaveApprovalModal from "./LeaveApprovalModal";
 import ApplyLeave from "./ApplyLeave";
@@ -24,6 +25,7 @@ import LeaveFilter from "./LeaveFilter"; // Assuming you have a filter component
 import api from "../../services/api"; // Adjust the import path as necessary
 import Notification from "../../components/Notification";
 import { STATUS_MAP } from "../../utils/constants"; // Assuming you have a constants file for status mapping
+import LeaveBalanceCard from "./LeaveBalanceCard";
 
 const dummyLeaves = [
   {
@@ -49,33 +51,46 @@ export default function MyLeavesList() {
     severity: "error",
     message: "",
   });
+  const [leaveBalData, setLeaveBalData] = useState({});
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchLeaves = async () => {
     try {
-    const res = await api.getMyLeave()
-    setLeaves(res?.items)
+      const res = await api.getMyLeave(page+1, rowsPerPage);
+      const leaveBal = await api.getLeaveBalance();
+      setLeaveBalData(leaveBal);
+      setLeaves(res?.items);
+      setTotalCount(res?.total)
     } catch (err) {
       setNotif({
         open: true,
         severity: "error",
-        message: err.message || 'Failed to fetch',
+        message: err.message || "Failed to fetch",
       });
     }
-  }
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchLeaves();
-  }, [])
+  }, [page, rowsPerPage]);
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <Box sx={{ mb: 3 }}>
       <Typography variant="h6" mb={4}>
-        Leaves Management
+        My Leaves
       </Typography>
 
-      <ApplyLeave
-        onSubmit={() => fetchLeaves()}
-      />
+      <LeaveBalanceCard balances={leaveBalData} />
+
+      <ApplyLeave onSubmit={() => fetchLeaves()} />
 
       <Paper sx={{ p: 4 }}>
         <Typography variant="h6">My Leaves</Typography>
@@ -103,6 +118,14 @@ export default function MyLeavesList() {
             </TableBody>
           </Table>
         </Box>
+        <TablePagination
+          component="div"
+          count={totalCount}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
 
         <LeaveApprovalModal
           open={modalOpen}

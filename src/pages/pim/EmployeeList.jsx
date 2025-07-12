@@ -92,7 +92,7 @@ export default function EmployeeList() {
         mb={2}
         width={"100%"}
       >
-        <Typography variant="h6">Employee Information</Typography>
+        <Typography variant="h6">Employee Management</Typography>
       </Stack>
 
       <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
