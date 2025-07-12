@@ -63,6 +63,7 @@ A modern web-based Human Resource Management (HRM) system built with **React**, 
 ## 📦 Project Structure
 KiWi-HRM/
 ├── src/
+|
 │ ├── components/
 │ ├── layouts/
 │ ├── pages/
