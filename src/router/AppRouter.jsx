@@ -34,6 +34,9 @@ import MyAttendanceList from "../pages/attendance/MyAttendanceList"
 import MySalaryList from "../pages/salary/MySalaryList"
 import AdminCourseApprovals from "../pages/performance/AdminCourseApprovals"
 import MyLeavesList from "../pages/leave/MyLeavesList"
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
+import QualificationDetails from "../pages/pim/QualificationDetails"
 
 const pim = {
   path: "edit/:id",
@@ -60,14 +63,22 @@ const pim = {
       path: "dependents",
       element: <DependentDetails />,
     },
+    {
+      path: "qualifications",
+      element: <QualificationDetails />,
+    },
   ],
 };
 
 const router = createBrowserRouter([
   {
-    path: "/login",
+    path: "/",
     element: <LoginLayout />,
-    children: [{ index: true, element: <Login /> }],
+    children: [
+      { index: true, path: "login", element: <Login /> },
+      { path: "forgotpassword", element: <ForgotPassword /> },
+      { path: "resetpassword", element: <ResetPassword /> },
+    ],
   },
   {
     path: "/",

@@ -1,6 +1,12 @@
 export const ROLES = ["Admin", "Employee"];
-export const DEPARTMENTS = ["Engineering", "Management", "HR", "Finance", "Marketing", "Sales", "Operations", "Support"];
+export const DEPARTMENTS = ["HR", "Finance", "IT", "Sales", "Operations"];
 export const STATUS = ["Active", "Inactive"];
+
+export const GENDERS = ["Male", "Female", "Other"];
+export const MARITAL_STATUSES = ["Single", "Married", "Divorced"];
+export const NATIONALITIES = ["New Zealand", "Australian", "Sri Lanka", "Other"];
+export const EMP_STATUS = ["Full-Time", "Part-Time", "Contract", "Intern"];
+
 export const MONTHS = [
   { label: "January", value: "01" },
   { label: "February", value: "02" },
@@ -53,11 +59,27 @@ export const NOTIFICATION_TYPES = {
   warning: { label: "Warning", color: "warning" },
   error: { label: "Error", color: "error" },
 };
-export const NOTIFICATION_MESSAGES = {
-  leaveApproved: "Leave request approved successfully.",
-  leaveRejected: "Leave request rejected.",
-  salaryAdded: "Salary details added successfully.",
-  salaryUpdated: "Salary details updated successfully.",
-  attendanceMarked: "Attendance marked successfully.",
-  errorOccurred: "An error occurred. Please try again later.",
-};
+
+export const JOB_TITLE = [
+  "Software Engineer",
+  "Frontend Developer",
+  "Backend Developer",
+  "Full Stack Developer",
+  "UI/UX Designer",
+  "Product Manager",
+  "Project Manager",
+  "HR Manager",
+  "Recruiter",
+  "Finance Analyst",
+  "Accountant",
+  "Marketing Specialist",
+  "Sales Executive",
+  "Customer Support Representative",
+  "Operations Manager",
+  "Data Analyst",
+  "Data Scientist",
+  "DevOps Engineer",
+  "QA Engineer",
+  "IT Support Specialist",
+];
+

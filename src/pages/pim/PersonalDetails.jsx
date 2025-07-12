@@ -12,13 +12,13 @@ import { useParams } from "react-router-dom";
 import api from "../../services/api"; // Adjust the import path as necessary
 import Notification from "../../components/Notification"; // Adjust the import path as necessary
 import CircularProgress from "@mui/material/CircularProgress";
-
-const genders = ["Male", "Female", "Other"];
-const maritalStatuses = ["Single", "Married", "Divorced"];
-const nationalities = ["New Zealand", "Australian", "Sri Lanka", "Other"];
+import useAuthStore from "../../store/authStore";
+import {GENDERS, MARITAL_STATUSES, NATIONALITIES} from "../../utils/constants"
 
 export default function PersonalDetails() {
   const { id } = useParams();
+  const userInfo = useAuthStore((state)=>state.user || {})
+  const eId = useAuthStore((state) => state.user?.employee_id) || "employee";
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -101,6 +101,8 @@ export default function PersonalDetails() {
     setLoading(true);
     try {
       const data = await api.updateEmployee(id, {personal_details: form});
+      console.log(userInfo, "userInfo")
+      useAuthStore.getState().setUser({...userInfo, personal_details: JSON.stringify(form)})
       setNotif({ open: true, message: data.message || "Successfuly Updated Profile", severity: "success" });
     } catch (err) {
       setNotif({ open: true, message: err.message || "Failed to Updated Profile", severity: "error" });
@@ -115,13 +117,14 @@ export default function PersonalDetails() {
     <Box component="form" onSubmit={handleSubmit}>
       <Stack spacing={2} alignItems="center" mb={3}>
         <Avatar src={form.image} sx={{ width: 80, height: 80 }} />
-        <Button component="label" variant="outlined">
+        <Button component="label" variant="outlined" disabled={!editModeOn}>
           Upload Image
           <input
             type="file"
             hidden
             accept="image/*"
             onChange={handleImageChange}
+            disabled={!editModeOn}
           />
         </Button>
       </Stack>
@@ -172,7 +175,7 @@ export default function PersonalDetails() {
             helperText={errors.gender}
             InputProps={{ readOnly: !editModeOn }}
           >
-            {genders.map((g) => (
+            {GENDERS.map((g) => (
               <MenuItem key={g} value={g}>
                 {g}
               </MenuItem>
@@ -205,7 +208,7 @@ export default function PersonalDetails() {
             helperText={errors.maritalStatus}
             InputProps={{ readOnly: !editModeOn }}
           >
-            {maritalStatuses.map((s) => (
+            {MARITAL_STATUSES.map((s) => (
               <MenuItem key={s} value={s}>
                 {s}
               </MenuItem>
@@ -224,7 +227,7 @@ export default function PersonalDetails() {
             helperText={errors.nationality}
             InputProps={{ readOnly: !editModeOn }}
           >
-            {nationalities.map((n) => (
+            {NATIONALITIES.map((n) => (
               <MenuItem key={n} value={n}>
                 {n}
               </MenuItem>

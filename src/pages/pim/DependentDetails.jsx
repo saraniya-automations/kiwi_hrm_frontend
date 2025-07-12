@@ -63,7 +63,7 @@ export default function DependentDetails() {
   };
 
   const handleAddDependent = () => {
-    setDependents([...dependents, { ...defaultDependent }]);
+    setDependents([...dependents, defaultDependent]);
     setErrors([...errors, {}]);
   };
 

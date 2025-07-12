@@ -16,6 +16,7 @@ import {
   TextField,
   Stack,
   Modal,
+  TablePagination,
 } from "@mui/material";
 import LeaveApprovalModal from "./LeaveApprovalModal";
 import ApplyLeave from "./ApplyLeave";
@@ -25,21 +26,8 @@ import api from "../../services/api"; // Adjust the import path as necessary
 import Notification from "../../components/Notification";
 import { STATUS_MAP } from "../../utils/constants"; // Assuming you have a constants file for status mapping
 
-const dummyLeaves = [
-  {
-    id: 1,
-    employee: "Alice",
-    type: "Sick Leave",
-    startDate: "2025-06-24",
-    endDate: "2025-06-26",
-    reason: "Fever",
-    status: "Pending",
-  },
-  // Add more entries here
-];
-
 export default function LeavesList() {
-  const [leaves, setLeaves] = useState(dummyLeaves);
+  const [leaves, setLeaves] = useState([]);
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,60 +37,75 @@ export default function LeavesList() {
     severity: "error",
     message: "",
   });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchPendingLeaves = async () => {
     try {
-    const res = await api.getPendingLeave()
-    setLeaves(res?.items)
+      const res = await api.getPendingLeave(page+1, rowsPerPage);
+      setLeaves(res?.items);
+      setTotalCount(res?.total);
     } catch (err) {
       setNotif({
         open: true,
         severity: "error",
-        message: err.message || 'Failed to fetch',
+        message: err.message || "Failed to fetch",
       });
     }
-  }
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchPendingLeaves();
-  }, [])
+  }, [page, rowsPerPage]);
 
   const handleApprove = async (id) => {
     try {
-      const res = await api.updateLeaveStatus(id, 'Approved')
-      fetchPendingLeaves()
-    } catch (err) {
-
-    }
-    
+      const res = await api.updateLeaveStatus(id, "Approved");
+      fetchPendingLeaves();
+      setNotif({open:true, severity: "success", message: res.message || "Leave approved successfully."})
+    } catch (err) {}
   };
 
   const handleReject = async (id) => {
     if (window.confirm(`Are you sure you want to reject this leave - ${id}?`)) {
       try {
-        const res = await api.updateLeaveStatus(id, 'Rejected');
-        setNotif({ open: true, message: res.msg || "Successfully deleted user", severity: "success" });
+        const res = await api.updateLeaveStatus(id, "Rejected");
+        setNotif({
+          open: true,
+          message: res.msg || "Successfully deleted user",
+          severity: "success",
+        });
       } catch (err) {
-        setNotif({ open: true, message: err.message || "Failed to delete user", severity: "error" });
+        setNotif({
+          open: true,
+          message: err.message || "Failed to delete user",
+          severity: "error",
+        });
       }
       fetchUsers();
     }
   };
 
-  const handleSearch = async(query) => {
-    const {name, startDate, endDate} = query
+  const handleSearch = async (query) => {
+    const { name, startDate, endDate } = query;
     try {
       if (!name && !startDate && !endDate) {
         // If no filters, reset to initial data
+        // setNotif({open:true, severity: "error", message: "Enter all values",})
         setFilteredData([]); // Reset filtered data
       } else {
-        // Fetch data based on provided filters   
+        // Fetch data based on provided filters
         const res = await api.getLeaveByFilter(name, startDate, endDate);
-        setFilteredData(res)
+        setFilteredData(res?.items);
       }
-    } catch (err) {
+    } catch (err) {}
+  };
 
-    }
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
@@ -111,9 +114,7 @@ export default function LeavesList() {
         Leaves Management
       </Typography>
 
-      <ApplyLeave
-        onSubmit={() => fetchPendingLeaves()}
-      />
+      <ApplyLeave onSubmit={() => fetchPendingLeaves()} />
 
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 6 }}>
         <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
@@ -223,6 +224,14 @@ export default function LeavesList() {
             </TableBody>
           </Table>
         </Box>
+        <TablePagination
+          component="div"
+          count={totalCount}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
 
         <LeaveApprovalModal
           open={modalOpen}

@@ -24,7 +24,7 @@ export default function EmployeeSalaryList() {
   const navigate = useNavigate();
   const [salaries, setSalaries] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10); // Default rows per page
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [filteredData, setFilteredData] = useState([]);
 
