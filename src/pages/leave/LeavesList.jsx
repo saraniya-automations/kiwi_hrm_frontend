@@ -53,7 +53,7 @@ export default function LeavesList() {
   const fetchPendingLeaves = async () => {
     try {
     const res = await api.getPendingLeave()
-    setLeaves(res)
+    setLeaves(res?.items)
     } catch (err) {
       setNotif({
         open: true,
