@@ -25,6 +25,7 @@ export default function EmergencyDetails() {
     message: "",
   }); // Notification state
   const [loading, setLoading] = useState(false); // Loading state
+  const [cacheForm, setCacheForm] = useState(initialForm);
 
   const fetchEmployee = async () => {
     setLoading(true);
@@ -38,6 +39,8 @@ export default function EmergencyDetails() {
         ...prev,
         ...parsed,
       }));
+
+      setCacheForm(parsed)
       // console.log("Fetched employee data:", data);
       // setEmployeeInfo(data ? JSON.parse(data) : {});
     } catch (err) {
@@ -59,6 +62,10 @@ export default function EmergencyDetails() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (Object.keys(errors).length > 0) {
+      setErrors({});
+      return;
+    }
   };
 
   const validate = () => {
@@ -79,6 +86,7 @@ export default function EmergencyDetails() {
     setLoading(true);
     try {
       const data = await api.updateEmployee(id, { emergency_contacts: form });
+      setCacheForm(form)
       setNotif({
         open: true,
         message: data.message || "Successfuly Updated Profile",
@@ -103,7 +111,7 @@ export default function EmergencyDetails() {
         Primary Contact
       </Typography>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{xs:12, sm:4}}>
           <TextField
             label="Name"
             name="primaryName"
@@ -112,9 +120,10 @@ export default function EmergencyDetails() {
             fullWidth
             error={!!errors.primaryName}
             helperText={errors.primaryName}
+            InputProps={{ readOnly: !editModeOn }}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{xs:12, sm:4}}>
           <TextField
             label="Relationship"
             name="primaryRelationship"
@@ -123,9 +132,10 @@ export default function EmergencyDetails() {
             fullWidth
             error={!!errors.primaryRelationship}
             helperText={errors.primaryRelationship}
+            InputProps={{ readOnly: !editModeOn }}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{xs:12, sm:4}}>
           <TextField
             label="Phone"
             name="primaryPhone"
@@ -134,6 +144,7 @@ export default function EmergencyDetails() {
             fullWidth
             error={!!errors.primaryPhone}
             helperText={errors.primaryPhone}
+            InputProps={{ readOnly: !editModeOn }}
           />
         </Grid>
       </Grid>
@@ -142,31 +153,34 @@ export default function EmergencyDetails() {
         Secondary Contact (Optional)
       </Typography>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{xs:12, sm:4}}>
           <TextField
             label="Name"
             name="secondaryName"
             value={form.secondaryName}
             onChange={handleChange}
             fullWidth
+            InputProps={{ readOnly: !editModeOn }}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{xs:12, sm:4}}>
           <TextField
             label="Relationship"
             name="secondaryRelationship"
             value={form.secondaryRelationship}
             onChange={handleChange}
             fullWidth
+            InputProps={{ readOnly: !editModeOn }}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{xs:12, sm:4}}>
           <TextField
             label="Phone"
             name="secondaryPhone"
             value={form.secondaryPhone}
             onChange={handleChange}
             fullWidth
+            InputProps={{ readOnly: !editModeOn }}
           />
         </Grid>
       </Grid>
@@ -180,7 +194,10 @@ export default function EmergencyDetails() {
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => setEditModeOn(!editModeOn)}
+          onClick={() => {
+            setEditModeOn(!editModeOn)
+            {editModeOn ? setForm(cacheForm) : null}
+          }}
         >
           {editModeOn ? "Cancel Edit" : "Edit"}
         </Button>

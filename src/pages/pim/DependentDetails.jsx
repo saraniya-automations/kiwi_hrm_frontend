@@ -23,7 +23,7 @@ const defaultDependent = {
 
 export default function DependentDetails() {
   const { id } = useParams();
-  const [dependents, setDependents] = useState([defaultDependent]);
+  const [dependents, setDependents] = useState([{id: 1, defaultDependent}]);
   const [errors, setErrors] = useState([]);
   const [editModeOn, setEditModeOn] = useState(false); // Edit mode state
   const [notif, setNotif] = useState({
@@ -32,13 +32,17 @@ export default function DependentDetails() {
     message: "",
   }); // Notification state
   const [loading, setLoading] = useState(false); // Loading state
+  const [cacheForm, setCacheForm] = useState([{id: 1, defaultDependent}]);
 
   const fetchEmployee = async () => {
     setLoading(true);
     try {
       const data = await api.getEmployeeById(id);
       const parsed = data?.dependents ? JSON.parse(data.dependents) : [];
-      parsed.length > 0 && setDependents(Array.isArray(parsed) ? parsed : []);
+      if (parsed.length > 0) {
+        setDependents(Array.isArray(parsed) ? parsed : []);
+        setCacheForm(Array.isArray(parsed) ? parsed : [])
+      }
     } catch (err) {
       console.error("Error fetching employee data:", err);
       setNotif({
@@ -63,7 +67,7 @@ export default function DependentDetails() {
   };
 
   const handleAddDependent = () => {
-    setDependents([...dependents, defaultDependent]);
+    setDependents([...dependents, {id: dependents?.length+2, defaultDependent}]);
     setErrors([...errors, {}]);
   };
 
@@ -92,6 +96,7 @@ export default function DependentDetails() {
     setLoading(true);
     try {
       const data = await api.updateEmployee(id, { dependents: dependents });
+      setCacheForm(dependents)
       setNotif({
         open: true,
         message: data.message || "Successfuly Updated Profile",
@@ -112,9 +117,9 @@ export default function DependentDetails() {
   if (loading) return <CircularProgress />;
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      {dependents.map((dep, index) => (
+      {dependents?.map((dep, index) => (
         <Box
-          key={index}
+          key={dep.id}
           sx={{
             border: "1px solid #ddd",
             borderRadius: 2,
@@ -124,7 +129,7 @@ export default function DependentDetails() {
           }}
         >
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{xs:12, sm:4}}>
               <TextField
                 label="Name"
                 name="name"
@@ -136,7 +141,7 @@ export default function DependentDetails() {
                 InputProps={{ readOnly: !editModeOn }}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{xs:12, sm:4}}>
               <TextField
                 label="Relationship"
                 name="relationship"
@@ -148,7 +153,7 @@ export default function DependentDetails() {
                 InputProps={{ readOnly: !editModeOn }}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{xs:12, sm:3}}>
               <TextField
                 label="Date of Birth"
                 name="dob"
@@ -191,7 +196,10 @@ export default function DependentDetails() {
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => setEditModeOn(!editModeOn)}
+          onClick={() => {
+            setEditModeOn(!editModeOn)
+            editModeOn ? setDependents(cacheForm) : null
+          }}
         >
           {editModeOn ? "Cancel Edit" : "Edit"}
         </Button>

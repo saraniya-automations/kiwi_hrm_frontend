@@ -53,7 +53,7 @@ export default function DashboardAdmin() {
         <Grid size={{ xs: 12, sm: 4 }}>
           <Card>
             <CardContent>
-              <Typography variant="h6">Absent Today</Typography>
+              <Typography variant="h6">Present Today</Typography>
               <Typography variant="h4" color="error.main">
                 {stats.employees_on_leave}
               </Typography>
@@ -63,7 +63,7 @@ export default function DashboardAdmin() {
         <Grid size={{ xs: 12, sm: 4 }}>
           <Card>
             <CardContent>
-              <Typography variant="h6">Pending Leaves</Typography>
+              <Typography variant="h6">Pending Attendance</Typography>
               <Typography variant="h4" color="warning.main">
                 {stats.pending_requests}
               </Typography>
