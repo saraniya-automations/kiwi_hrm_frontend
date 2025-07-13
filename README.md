@@ -61,6 +61,7 @@ A modern web-based Human Resource Management (HRM) system built with **React**, 
 ---
 
 ## 📦 Project Structure
+```
 KiWi-HRM/
 ├── src/
 |
@@ -86,7 +87,7 @@ KiWi-HRM/
 │ └── App.jsx
 ├── .env # VITE_API_BASE_URL
 ├── README.md
-
+```
 
 ## 🛠️ Setup Instructions
 
