@@ -155,7 +155,7 @@ export default function UserAdd() {
             <Button type="submit" variant="contained">
               Save
             </Button>
-            <Button variant="outlined" color="secondary" onClick={handleCancel}>
+            <Button variant="outlined" onClick={handleCancel}>
               Cancel
             </Button>
           </Grid>

@@ -25,6 +25,7 @@ import LeaveFilter from "./LeaveFilter"; // Assuming you have a filter component
 import api from "../../services/api"; // Adjust the import path as necessary
 import Notification from "../../components/Notification";
 import { STATUS_MAP } from "../../utils/constants"; // Assuming you have a constants file for status mapping
+import LeaveBalanceCard from "./LeaveBalanceCard";
 
 export default function LeavesList() {
   const [leaves, setLeaves] = useState([]);
@@ -40,10 +41,13 @@ export default function LeavesList() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [leaveBalData, setLeaveBalData] = useState({});
 
   const fetchPendingLeaves = async () => {
     try {
       const res = await api.getPendingLeave(page+1, rowsPerPage);
+      const leaveBal = await api.getLeaveBalance();
+      setLeaveBalData(leaveBal);
       setLeaves(res?.items);
       setTotalCount(res?.total);
     } catch (err) {
@@ -64,7 +68,13 @@ export default function LeavesList() {
       const res = await api.updateLeaveStatus(id, "Approved");
       fetchPendingLeaves();
       setNotif({open:true, severity: "success", message: res.message || "Leave approved successfully."})
-    } catch (err) {}
+    } catch (err) {
+      setNotif({
+        open: true,
+        message: err.message || "Failed to delete user",
+        severity: "error",
+      });
+    }
   };
 
   const handleReject = async (id) => {
@@ -113,6 +123,8 @@ export default function LeavesList() {
       <Typography variant="h6" mb={4}>
         Leaves Management
       </Typography>
+      
+      <LeaveBalanceCard balances={leaveBalData} />
 
       <ApplyLeave onSubmit={() => fetchPendingLeaves()} />
 

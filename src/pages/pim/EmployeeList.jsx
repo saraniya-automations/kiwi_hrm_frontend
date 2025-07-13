@@ -34,11 +34,11 @@ export default function EmployeeList() {
 
   const navigate = useNavigate();
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (key = search) => {
     setLoading(true);
     setError("");
     try {
-      const data = await api.getEmployees(rowsPerPage, page+1, search)
+      const data = await api.getEmployees(rowsPerPage, page+1, key)
       setEmployees(data?.items);
       setTotalCount(data?.total)
     } catch (err) {
@@ -56,19 +56,13 @@ export default function EmployeeList() {
     navigate(`/admin/pim/edit/${id}/personal`);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this employee?")) {
-      setEmployees((prev) => prev.filter((e) => e.id !== id));
-    }
-  };
-
   const handleSearch = async (e) => {
     fetchEmployees();
   };
 
   const handleClear = () => {
     setSearch("");
-    fetchEmployees();
+    fetchEmployees("");
   };
 
   const handleChangePage = (event, newPage) => setPage(newPage);

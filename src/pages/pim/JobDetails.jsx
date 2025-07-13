@@ -35,6 +35,7 @@ export default function JobDetails() {
     message: "",
   }); // Notification state
   const [loading, setLoading] = useState(false); // Loading state
+   const [cacheForm, setCacheForm] = useState(initialForm);
 
   const fetchEmployee = async () => {
     setLoading(true);
@@ -46,6 +47,7 @@ export default function JobDetails() {
         ...prev,
         ...parsed,
       }));
+      setCacheForm(parsed)
       // console.log("Fetched employee data:", data);
       // setEmployeeInfo(data ? JSON.parse(data) : {});
     } catch (err) {
@@ -88,6 +90,7 @@ export default function JobDetails() {
     setLoading(true);
     try {
       const data = await api.updateEmployee(id, { job_details: form });
+      setCacheForm(form)
       setNotif({
         open: true,
         message: data.message || "Successfuly Updated Profile",
@@ -225,7 +228,10 @@ export default function JobDetails() {
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => setEditModeOn(!editModeOn)}
+          onClick={() => {
+            setEditModeOn(!editModeOn);
+            editModeOn ? setForm(cacheForm) : null;
+          }}
         >
           {editModeOn ? "Cancel Edit" : "Edit"}
         </Button>

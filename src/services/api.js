@@ -59,9 +59,9 @@ const api = {
     }
   },
 
-  getAllUsers: async (limit = 10, offset = 0) => {
+  getAllUsers: async (limit = 10, offset = 1) => {
     try {
-      const res = await request(`/users?limit=${limit}&offset=${offset}`);
+      const res = await request(`/users?per_page=${limit}&page=${offset}`);
       return res;
     } catch (error) {
       throw new Error(error.message || "Failed to fetch users");
@@ -279,9 +279,10 @@ const api = {
 
   exportSalary: async (id, month) => {
     const token = getToken();
+    const query = id ? `employee_id=${id}&month=${month}` : `month=${month}`
     try {
       const res = await fetch(
-        `${BASE_URL}/salary/export-pdf?employee_id=${id}&month=${month}`,
+        `${BASE_URL}/salary/export-pdf?${query}`,
         {
           method: "GET",
           headers: {

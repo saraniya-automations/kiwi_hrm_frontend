@@ -102,6 +102,7 @@ export default function MyLeavesList() {
                 <TableCell>Type</TableCell>
                 <TableCell>Dates</TableCell>
                 <TableCell>Reason</TableCell>
+                <TableCell>Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -113,6 +114,7 @@ export default function MyLeavesList() {
                     {leave.start_date} to {leave.end_date}
                   </TableCell>
                   <TableCell>{leave.reason}</TableCell>
+                  <TableCell>{leave.status}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

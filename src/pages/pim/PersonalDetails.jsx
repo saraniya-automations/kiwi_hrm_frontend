@@ -15,19 +15,21 @@ import CircularProgress from "@mui/material/CircularProgress";
 import useAuthStore from "../../store/authStore";
 import {GENDERS, MARITAL_STATUSES, NATIONALITIES} from "../../utils/constants"
 
+const initialFormState = {
+  firstName: "",
+  lastName: "",
+  gender: "",
+  dob: "",
+  maritalStatus: "",
+  nationality: "",
+  image: null,
+}
+
 export default function PersonalDetails() {
   const { id } = useParams();
   const userInfo = useAuthStore((state)=>state.user || {})
   const eId = useAuthStore((state) => state.user?.employee_id) || "employee";
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    gender: "",
-    dob: "",
-    maritalStatus: "",
-    nationality: "",
-    image: null,
-  });
+  const [form, setForm] = useState(initialFormState);
   const [errors, setErrors] = useState({}); // Form validation errors
   const [loading, setLoading] = useState(false); // Loading state
   const [employeeInfo, setEmployeeInfo] = useState({}); // Personal info state
@@ -38,6 +40,7 @@ export default function PersonalDetails() {
     severity: "error",
     message: "",
   }); // Notification state
+  const [cacheForm, setCacheForm] = useState(initialFormState);
 
   const validate = () => {
     const newErrors = {};
@@ -63,6 +66,10 @@ export default function PersonalDetails() {
         ...prev,
         ...parsed,
       }));
+      setCacheForm((prev) => ({
+        ...prev,
+        ...parsed,
+      }))
       // console.log("Fetched employee data:", data);
       // setEmployeeInfo(data ? JSON.parse(data) : {});
     } catch (err) {
@@ -101,8 +108,8 @@ export default function PersonalDetails() {
     setLoading(true);
     try {
       const data = await api.updateEmployee(id, {personal_details: form});
-      console.log(userInfo, "userInfo")
       useAuthStore.getState().setUser({...userInfo, personal_details: JSON.stringify(form)})
+      setCacheForm(form)
       setNotif({ open: true, message: data.message || "Successfuly Updated Profile", severity: "success" });
     } catch (err) {
       setNotif({ open: true, message: err.message || "Failed to Updated Profile", severity: "error" });
@@ -245,7 +252,16 @@ export default function PersonalDetails() {
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => setEditModeOn(!editModeOn)}
+          onClick={() => {
+            setEditModeOn(!editModeOn)
+            console.log({
+              ...cacheForm
+            }, 'CACHEFORM')
+            setForm((prev) => ({
+              ...prev,
+              ...cacheForm
+            }));
+          }}
         >
           {editModeOn ? "Cancel Edit" : "Edit"}
         </Button>

@@ -12,7 +12,7 @@ const LeaveBalanceCard = ({ balances }) => {
       <CardContent>
         <Box display="flex" alignItems="center" gap={1} mb={2}>
           <TimeToLeaveIcon color="primary" />
-          <Typography variant="h6">Leave Balances</Typography>
+          <Typography variant="h6">My Leave Balances</Typography>
         </Box>
 
         <Grid container spacing={2}>

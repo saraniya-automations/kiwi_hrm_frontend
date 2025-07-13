@@ -19,6 +19,7 @@ import api from "../../services/api"; // Adjust the import path as necessary
 import { useNavigate } from "react-router-dom";
 import AddSalary from "./AddSalary"; // Assuming you have an AddSalary component
 import SalaryFilter from "./SalaryFilter";
+import Notification from "../../components/Notification";
 
 export default function EmployeeSalaryList() {
   const navigate = useNavigate();
@@ -27,10 +28,15 @@ export default function EmployeeSalaryList() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [filteredData, setFilteredData] = useState([]);
+  const [notif, setNotif] = useState({
+    open: false,
+    severity: "error",
+    message: "",
+  });
 
   async function fetchSalary(page = 0, rowsPerPage = 10) {
     //   const res = await api.get("/salary/my");
-    const res = await api.getAllSalary(page+1, rowsPerPage);
+    const res = await api.getAllSalary(page + 1, rowsPerPage);
     setSalaries(res?.items || []);
     setTotalCount(res.total || 0);
   }
@@ -39,14 +45,35 @@ export default function EmployeeSalaryList() {
   }, []);
 
   const handleDownload = async (id, month) => {
-    const res = await api.exportSalary(id, month);
-    const blob = await res.blob();
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = `salary_report_${id}_${month}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    try {
+      const res = await api.exportSalary(id, month);
+      const blob = await res.blob();
+      if (blob && blob.size > 50) {
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `salary_report_${id}_${month}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setNotif({
+          open: true,
+          severity: "success",
+          message: "Export Salary Slip Successfully!",
+        });
+      } else {
+        setNotif({
+          open: true,
+          severity: "error",
+          message: "No records Found!",
+        });
+      }
+    } catch (err) {
+      setNotif({
+        open: true,
+        severity: "error",
+        message: err.message || "Export Report Failed!",
+      });
+    }
   };
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -78,6 +105,40 @@ export default function EmployeeSalaryList() {
       }
     } catch (err) {}
   };
+  const handleExportReport = async (query) => {
+    const { id, year, month } = query;
+
+    try {
+      const res = await api.exportSalary(undefined, `${year}-${month}`);
+      const blob = await res.blob();
+      if (blob && blob.size > 50) {
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `salary_report_${year}-${month}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setNotif({
+          open: true,
+          severity: "success",
+          message: "Export Report Successfully!",
+        });
+      } else {
+        setNotif({
+          open: true,
+          severity: "error",
+          message: "No records Found!",
+        });
+      }
+      
+    } catch (err) {
+      setNotif({
+        open: true,
+        severity: "error",
+        message: err.message || "Export Report Failed!",
+      });
+    }
+  };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -87,7 +148,7 @@ export default function EmployeeSalaryList() {
 
       <AddSalary onSubmit={fetchSalary} />
 
-      <Paper elevation={3} sx={{ padding: 3, marginTop: 4 }}>
+      <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
         <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
           View Employee Salary
         </Typography>
@@ -138,7 +199,19 @@ export default function EmployeeSalaryList() {
         </TableContainer>
       </Paper>
 
-      <Paper sx={{ p: 4, mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
+        <Typography variant="h6" gutterBottom sx={{ marginBottom: 3 }}>
+          Export Monthly Salary Report
+        </Typography>
+
+        <SalaryFilter
+          onSearch={handleExportReport}
+          itIsMy={true}
+          exportRep={true}
+        />
+      </Paper>
+
+      <Paper sx={{ p: 3, mt: 4 }}>
         <Typography variant="h6">Employee Salary</Typography>
         <Box overflow={"auto"} mb={2}>
           <Table>
@@ -182,6 +255,12 @@ export default function EmployeeSalaryList() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      <Notification
+        open={notif.open}
+        onClose={() => setNotif({ ...notif, open: false })}
+        severity={notif.severity}
+        message={notif.message}
+      />
     </Box>
   );
 }

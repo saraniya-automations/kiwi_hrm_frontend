@@ -26,7 +26,8 @@ export default function ContactDetails() {
     severity: "error",
     message: "",
   }); // Notification state
-    const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false); // Loading state
+  const [cacheForm, setCacheForm] = useState(initialForm);
 
   const countries = ["New Zealand", "Australia", "Sri Lanka", "Others"];
 
@@ -42,11 +43,16 @@ export default function ContactDetails() {
         ...prev,
         ...parsed,
       }));
+      setCacheForm(parsed)
       // console.log("Fetched employee data:", data);
       // setEmployeeInfo(data ? JSON.parse(data) : {});
     } catch (err) {
       console.error("Error fetching employee data:", err);
-      setNotif({ open: true, message: err.message || "Failed to Fetch Profile", severity: "error" });
+      setNotif({
+        open: true,
+        message: err.message || "Failed to Fetch Profile",
+        severity: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -77,16 +83,24 @@ export default function ContactDetails() {
     }
     setLoading(true);
     try {
-        // const updatedForm = { ...employeeInfo, personal_details: form };
-        const data = await api.updateEmployee(id, {contact_details: form});
-        console.log("Update Response:", data)
-        setNotif({ open: true, message: data.message || "Successfuly Updated Profile", severity: "success" });
-      } catch (err) {
-        setNotif({ open: true, message: err.message || "Failed to Updated Profile", severity: "error" });
-      } finally {
-        setEditModeOn(false);
-        setLoading(false); // Exit edit mode after saving
-      }
+      // const updatedForm = { ...employeeInfo, personal_details: form };
+      const data = await api.updateEmployee(id, { contact_details: form });
+      setCacheForm(form)
+      setNotif({
+        open: true,
+        message: data.message || "Successfuly Updated Profile",
+        severity: "success",
+      });
+    } catch (err) {
+      setNotif({
+        open: true,
+        message: err.message || "Failed to Updated Profile",
+        severity: "error",
+      });
+    } finally {
+      setEditModeOn(false);
+      setLoading(false); // Exit edit mode after saving
+    }
   };
 
   return (
@@ -187,7 +201,10 @@ export default function ContactDetails() {
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => setEditModeOn(!editModeOn)}
+          onClick={() => {
+            setEditModeOn(!editModeOn)
+            editModeOn && setForm(cacheForm)
+          }}
         >
           {editModeOn ? "Cancel Edit" : "Edit"}
         </Button>
